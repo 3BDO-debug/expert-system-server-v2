@@ -15,6 +15,7 @@ import sys
 import cloudinary
 import cloudinary.uploader
 import cloudinary.api
+import dj_database_url
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -109,6 +110,9 @@ DATABASES = {
         "NAME": BASE_DIR / "db.sqlite3",
     }
 }
+
+DATABASES["default"] = dj_database_url.config(conn_max_age=600, ssl_require=True)
+DATABASES["default"] = dj_database_url.config(default=os.environ.get("DATABASE_URL"))
 
 
 # Password validation
