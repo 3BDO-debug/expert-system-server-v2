@@ -12,3 +12,9 @@ class QuestionSerializer(ModelSerializer):
     class Meta:
         model = models.Question
         fields = "__all__"
+
+    def to_representation(self, instance):
+        data = super(QuestionSerializer, self).to_representation(instance)
+        if instance.question_image:
+            data["question_image"] = instance.question_image.url
+        return data
