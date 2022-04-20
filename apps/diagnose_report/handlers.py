@@ -1,3 +1,4 @@
+from statistics import mode
 from rest_framework.decorators import (
     api_view,
     permission_classes,
@@ -30,6 +31,12 @@ def diagnose_report_stage_checker(request):
     diagnose_report_serializer = serializers.DiagnoseReportSerializer(
         diagnose_report, many=False
     )
+    report_symptoms = models.DiagnoseResult.objects.filter(
+        diagnose_report=diagnose_report
+    )
+    report_symptoms_serializer = serializers.DiagnoseResultSerializer(
+        report_symptoms, many=True
+    )
 
     if diagnose_report.stage == "terminate":
         return Response(
@@ -44,6 +51,7 @@ def diagnose_report_stage_checker(request):
             data={
                 "terminate_quiz": False,
                 "diagnose_report_data": diagnose_report_serializer.data,
+                "symptoms": report_symptoms_serializer.data,
             },
             status=status.HTTP_200_OK,
         )
