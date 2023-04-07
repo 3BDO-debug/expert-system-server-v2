@@ -61,10 +61,7 @@ def should_i_skip(group_name):
 
     skip_list = ["G1", "G2", "G5"]
 
-    if group_name in skip_list:
-        return True
-    else:
-        return False
+    return group_name in skip_list
 
 
 def diagnose_report_updater(diagnose_report, all_no):
@@ -72,43 +69,37 @@ def diagnose_report_updater(diagnose_report, all_no):
     # G1 conditions
     if diagnose_report.stage == "G1" and all_no:
         diagnose_report.stage = "G2"
-    elif diagnose_report.stage == "G1" and not all_no:
+    elif diagnose_report.stage == "G1":
         diagnose_report.stage = "G3(A)"
 
-    # G2 conditions
     elif diagnose_report.stage == "G2" and all_no:
         diagnose_report.stage = "G4(A)"
-    elif diagnose_report.stage == "G2" and not all_no:
+    elif diagnose_report.stage == "G2":
         diagnose_report.stage = "G3(A)"
 
-    # G3(A) conditions
     elif diagnose_report.stage == "G3(A)" and all_no:
         diagnose_report.stage = "G4(A)"
-    elif diagnose_report.stage == "G3(A)" and not all_no:
+    elif diagnose_report.stage == "G3(A)":
         diagnose_report.pre_diagnose = "Patient have ankle fracture"
         diagnose_report.stage = "G3(B)"
 
-    # G3(B) conditions
     elif diagnose_report.stage == "G3(B)":
         diagnose_report.stage = "G5"
 
-    # G4(A) conditions
     elif diagnose_report.stage == "G4(A)" and all_no:
         diagnose_report.stage = "terminate"
         diagnose_report.final_diagnose = "Patient does not suffer from any injury"
-    elif diagnose_report.stage == "G4(A)" and not all_no:
+    elif diagnose_report.stage == "G4(A)":
         diagnose_report.stage = "G4(B)"
         diagnose_report.pre_diagnose = "Patient suffer from ankle sprain"
 
-    # G4(B) conditions
     elif diagnose_report.stage == "G4(B)":
         diagnose_report.stage = "G5"
 
-    # G5 conditions
     elif diagnose_report.stage == "G5" and all_no:
         diagnose_report.final_diagnose = "Patient can use tense therapy"
         diagnose_report.stage = "terminate"
-    elif diagnose_report.stage == "G5" and not all_no:
+    elif diagnose_report.stage == "G5":
         diagnose_report.final_diagnose = "Patient can not use tense therapy"
         diagnose_report.stage = "terminate"
 
@@ -139,18 +130,20 @@ def results_tracker(diagnose_report, answer, question_id):
             diagnose_answer=answer,
         ).save()
 
-        if "yes" not in diagnose_results_answers and answer == "yes":
-            diagnose_report_updater(diagnose_report=diagnose_report, all_no=False)
-
-        elif "yes" in diagnose_results_answers and answer == "no":
+        if (
+            "yes" not in diagnose_results_answers
+            and answer == "yes"
+            or "yes" in diagnose_results_answers
+            and answer == "no"
+            or ("yes" in diagnose_results_answers or answer != "no")
+            and "yes" in diagnose_results_answers
+            and answer == "yes"
+        ):
             diagnose_report_updater(diagnose_report=diagnose_report, all_no=False)
 
         elif "yes" not in diagnose_results_answers and answer == "no":
             diagnose_report_updater(diagnose_report=diagnose_report, all_no=True)
 
-        elif "yes" in diagnose_results_answers and answer == "yes":
-
-            diagnose_report_updater(diagnose_report=diagnose_report, all_no=False)
     else:
 
         models.DiagnoseResult.objects.create(
